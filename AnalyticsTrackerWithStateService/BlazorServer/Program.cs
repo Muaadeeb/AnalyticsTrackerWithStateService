@@ -6,6 +6,7 @@
 
 using BlazorServer.Analytics;
 using BlazorServer.Components;
+using BlazorServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddRazorComponents()
 
 // Analytics services
 builder.Services.AddAnalyticsTracking();
+builder.Services.AddScoped<IUserActivityStateService, UserActivityStateService>();
 
 var app = builder.Build();
 
