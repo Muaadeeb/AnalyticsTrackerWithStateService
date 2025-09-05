@@ -1,0 +1,60 @@
+﻿@using BlazorServer.Services.Interfaces
+
+@inject NavigationManager Nav
+@inject IAnalyticsService Analytics
+@inject IJSRuntime JS
+
+<CascadingValue Value="Analytics">
+    @ChildContent
+</CascadingValue>
+
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+
+    private bool _firstRender = true;
+
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            await Analytics.PageViewAsync(Nav.Uri, title: await TryGetTitleAsync());
+        }
+    }
+
+
+    private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        try
+        {
+            await Analytics.PageViewAsync(e.Location, title: await TryGetTitleAsync());
+        }
+        catch { /* non-fatal */ }
+        StateHasChanged();
+    }
+
+
+    private async Task<string?> TryGetTitleAsync()
+    {
+        try
+        {
+            return await JS.InvokeAsync<string?>("analyticsTracker.getTitle");
+        }
+        catch { return null; }
+    }
+
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+}

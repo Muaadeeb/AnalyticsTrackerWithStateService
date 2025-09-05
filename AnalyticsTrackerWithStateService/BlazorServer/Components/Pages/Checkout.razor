@@ -1,0 +1,21 @@
+﻿@page "/checkout"
+@using BlazorServer.Services.Interfaces
+
+@inject IAnalyticsService Analytics
+
+
+<h3>Checkout</h3>
+<button class="btn btn-primary" @onclick="LogAddToCart">Add To Cart</button>
+
+
+@code {
+    private async Task LogAddToCart()
+    {
+        await Analytics.EventAsync("add_to_cart", new Dictionary<string, object?>
+        {
+            ["sku"] = "ABC-123",
+            ["price"] = 19.99,
+            ["currency"] = "USD"
+        });
+    }
+}
